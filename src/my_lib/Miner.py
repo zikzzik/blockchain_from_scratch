@@ -14,18 +14,6 @@ class Miner:
         self.start_server_socket()
         self.launch_server()
 
-    def start_server_socket(self):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.host, self.port))
-        self.server_socket.listen(self.connection_list_size)
-        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        print("socket créée et à l'écoute")
-
-    def start_client_socket(self):
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.bind((self.host, self.port))
-
 
     def launch_server(self):
         print("Le serveur écoute à présent sur le port {}".format(self.port))
