@@ -1,17 +1,22 @@
 import socket
+from Socket import Socket
 
 
 class Miner:
 
-    def __init__(self, host="", port=9000, connection_ip=None, connection_port=None, connection_list_size=10):
+    def __init__(self, host="", port=9000, connection_host=None, connection_port=None, connection_list_size=10):
         self.host = host
         self.port = port
-        self.connection_ip = connection_ip
+        self.connection_host = connection_host
         self.connection_port = connection_port
         self.connection_list_size = connection_list_size
-        self.is_first = True if connection_ip is None else False
+        self.is_first = True if connection_host is None else False
 
-        self.start_server_socket()
+        self.server_socket = Socket("server", self.host, self.port, self.connection_list_size)
+
+        if self.is_first is False:
+            self.initialization()
+
         self.launch_server()
 
 
@@ -19,21 +24,17 @@ class Miner:
         print("Le serveur écoute à présent sur le port {}".format(self.port))
 
         while True:
-            client_socket, connection_info = self.server_socket.accept()
-            receive_message = self.server_socket.recv(1024)
+            client_socket, str_message = self.server_socket.read_message_with_server()
 
-            print(receive_message.decode())
+            print(str_message)
 
             client_socket.send(b"Liste des serveurs")
 
-            # envoyer en Thread
 
-    def clean_socket(self):
-        self.server_socket.close()
+
 
     def initialization(self):
-        connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connexion_avec_serveur.connect((hote, port))
+        self.server_socket = Socket("client", self.connection_host, self.connection_port)
+        self.server_socket.send_message("Salut je suis nouveau, give liste")
 
-    def __del__(self):
-        self.clean_socket()
+

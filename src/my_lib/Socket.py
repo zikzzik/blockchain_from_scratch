@@ -25,6 +25,7 @@ class Socket:
 
     def start_client_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.connect((self.host, self.port))
 
     def send_message(self, str_message):
@@ -33,5 +34,14 @@ class Socket:
         binary_message = str_message.encode()
         self.socket.send(binary_message)
 
-    async def start_listen(self):
-        pass
+    def read_message_with_client(self):
+        receive_message = self.socket.recv(1024)
+        return receive_message.decode()
+
+    def read_message_with_server(self):
+        client_socket, connection_info = self.socket.accept()
+        receive_message = self.socket.recv(1024)
+        return receive_message.decode(), client_socket
+
+    def close(self):
+        self.socket.close()
