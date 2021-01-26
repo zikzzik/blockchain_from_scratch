@@ -1,4 +1,4 @@
-import socket
+from .Message import Message
 
 
 class Channel:
@@ -7,10 +7,10 @@ class Channel:
         self.host = host
         self.port = port
 
-    def send_message(self, str_message):
-        binary_message = str_message.encode()
-        self.my_socket.send(binary_message)
+    def send_message(self, message: Message):
+        binaries = message.to_binary()
+        self.my_socket.send(binaries)
 
-    def read_message(self):
-        b_message = self.my_socket.recv(1024)
-        return b_message.decode()
+    def read_message(self) -> Message:
+        bin_message = self.my_socket.recv(1024)
+        return Message.from_binary(bin_message)

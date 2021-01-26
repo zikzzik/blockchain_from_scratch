@@ -1,4 +1,5 @@
 from .SocketConnection import SocketConnection
+from .Message import Message
 
 
 class Miner:
@@ -21,16 +22,22 @@ class Miner:
             channel = self.socket_connection.accept()
             message = channel.read_message()
             self.route_message(message)
-            channel.send_message("bien recu first")
-
+            channel.send_message(Message("ok"))
 
     def join_pool(self, host, port):
         # @todo  ajouter ce channel au reférentiel
         channel = SocketConnection(host, port).create_client(host, port)
-        channel.send_message("Coucou je vous rejoins")
-        print("Pool rejoins")
+        message_in = Message("join_pool")
+        channel.send_message(message_in)
+        message_out = channel.read_message()
+        print(f"Reply: pool join ? -> {message_out}")
 
-    def route_message(self, message):
-        print(f"Fais action calcule avec parametre --> {message}")
+    def new_server_accepted(self, message):
+        print("New server accepted : <ADD IP:PORT>")
+
+    def route_message(self, message: Message):
+        action_dict = {"join_pool": self.new_server_accepted}
+        action_dict[message.m_type](message)
+        
 
 
