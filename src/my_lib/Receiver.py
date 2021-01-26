@@ -20,6 +20,4 @@ class Receiver:
         client_socket, (host, port) = self.my_socket.accept()
         return client_socket, (host, port)
 
-    def read_canal(self, client_socket):
-        b_message = client_socket.recv(1024)
-        return b_message.decode()
+

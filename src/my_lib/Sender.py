@@ -36,3 +36,7 @@ class Sender:
         my_socket.connect((host, port))
         my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return my_socket
+
+    def read_canal(self, client_socket):
+        b_message = client_socket.recv(1024)
+        return b_message.decode()
