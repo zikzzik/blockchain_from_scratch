@@ -17,9 +17,8 @@ class Receiver:
         self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     def accept(self):
-        client_socket, addr = self.my_socket.accept()
-        print("DEBUG addr : ", addr, type(addr))
-        return client_socket
+        client_socket, (host, port) = self.my_socket.accept()
+        return client_socket, (host, port)
 
     def read_canal(self, client_socket):
         b_message = client_socket.recv(1024)

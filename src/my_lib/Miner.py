@@ -62,10 +62,12 @@ class Miner:
         print("Le serveur écoute à présent sur le port {}".format(self.port), flush=True)
 
         while True:
-            client_socket = self.receiver.accept()
-            # ajouté dans sender
+            client_socket, (host, port) = self.receiver.accept()
+            self.sender.add_connection(host, port, client_socket)
             message = self.receiver.read_canal(client_socket)
             self.route_message(message)
+            client_socket.send(b"bien recu first")
+            self.sender.send_message(host, port, "Bien recu second")
 
 
 

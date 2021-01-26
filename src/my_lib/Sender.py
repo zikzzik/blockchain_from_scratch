@@ -19,6 +19,8 @@ class Sender:
         recipient_socket = self.connection_dict[(host, port)]
         binary_message = str_message.encode()
         recipient_socket.send(binary_message)
+        message = recipient_socket.recv(1024)
+        print(message)
         return True
 
     def add_connection(self, host, port, my_socket):
