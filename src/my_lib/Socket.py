@@ -23,25 +23,34 @@ class Socket:
         self.socket.listen(self.connection_list_size)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+    def accept(self):
+        client_socket, addr = self.socket.accept()
+        return client_socket
+        # data = conn.recv(1024).decode()
+        # print(data)
+
+        # conn.send("ok".encode())
+
     def start_client_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.connect((self.host, self.port))
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def send_message(self, str_message):
-        assert self.socket_type == "client", "Only client can send message"
+    def read_canal(self, python_socket=None):
+        if python_socket:
+            b_message = python_socket.recv(1024)
+        else:
+            b_message = self.socket.recv(1024)
+        return b_message.decode()
 
+    def send_canal(self, str_message, python_socket=None):
         binary_message = str_message.encode()
-        self.socket.send(binary_message)
+        if python_socket:
+            python_socket.send(binary_message)
+        else:
+            self.socket.send(binary_message)
 
-    def read_message_with_client(self):
-        receive_message = self.socket.recv(1024)
-        return receive_message.decode()
 
-    def read_message_with_server(self):
-        client_socket, connection_info = self.socket.accept()
-        receive_message = self.socket.recv(1024)
-        return receive_message.decode(), client_socket
 
-    def close(self):
-        self.socket.close()
+
+
