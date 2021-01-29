@@ -21,7 +21,7 @@ class SocketConnection:
 
     def accept(self):
         client_socket, (host, port) = self.my_socket.accept()
-        return Channel(client_socket, host, port)
+        return Channel(client_socket, host, port), (host, port)
 
     def create_client(self):
         assert self.my_socket is None, "Socket already used"

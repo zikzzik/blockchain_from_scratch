@@ -1,35 +1,42 @@
 import warnings
 from .SocketConnection import SocketConnection
+from .Channel import Channel
 
 
 class ChannelManager:
 
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int) -> None:
         self.host = host
         self.port = port
-        self.connection_dict = {}  # (host, port) channel
+        self.connections: set = {(host, port)}  # (host, port) channel
 
-    def send_message(self, message):
-        message.source_dict = {"host": self.host, "port": self.port}
+    def send_message(self, message) -> [Channel, None]:
+        message.set_source(self.host, self.port)
         # ajouter hash, signature...
         message.add_created_at()
 
-        if message.destination_dict is not None:
+        if message.broadcast is False:
             # envoie unique
-            if (message.destination_dict["host"], message.destination_dict["port"]) not in self.connection_dict:
-                # on a pas de channel
-                channel = SocketConnection(message.destination_dict["host"], message.destination_dict["port"]).create_client()
-                self.add_channel(channel=channel, **message.destination_dict)
+            assert len(message.destination) == 2, "No destination in message"
+            channel = SocketConnection(message.destination["host"], message.destination["port"]).create_client()
+            channel.send_message(message)
 
-            # envoie message
-            self.connection_dict[(message.destination_dict["host"], message.destination_dict["port"])].send_message(message)
-
+            return channel
+            # a décommenter si on garde les sockets o
         else:
             # broadcast
-            pass
+            for host, port in self.connections:
+                if (host, port) == (self.host, self.port):
+                    continue
+                channel = SocketConnection(host, port).create_client()
+                channel.send_message(message)
+            return None
 
+    def add_server(self, host, port):
+        self.connections.add((host, port))
 
-    def add_channel(self, host, port, channel):
-        if (host, port) in self.connection_dict:
-            warnings.warn("On va écraser un channel")
-        self.connection_dict[(host, port)] = channel
+    def get_connections(self):
+        return self.connections
+
+    def answer_message(self, channel, message):
+        channel.send_message(message)

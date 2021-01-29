@@ -7,6 +7,7 @@ class Message:
     """
     Message type allow:
         join_pool -> first message to join pool
+        connection_list -> list of all connections knows by the miner
         ok -> positive reply
         error -> error reply
         test -> use only in development
@@ -14,7 +15,7 @@ class Message:
 
     # signature ???
 
-    def __init__(self, m_type, content=None, destination_dict: dict = None):
+    def __init__(self, m_type: str, content: any = None, destination: dict = None, broadcast=False):
         """
 
         :param channel_manager:
@@ -23,10 +24,11 @@ class Message:
         :param destination: if none -> broadcast
         """
 
-        self.destination_dict = destination_dict
+        self.destination: dict = destination
 
-        self.content = content
-        self.m_type = m_type
+        self.content: str = content
+        self.m_type: str = m_type
+        self.broadcast: bool = broadcast
 
     def to_binary(self):
         return pickle.dumps(self)
@@ -47,3 +49,5 @@ class Message:
     #     self.hash = hashlib.md5(b'Hello World')
         pass
 
+    def set_source(self, host: str, port: int):
+        self.source: dict = {"host": host, "port": port}

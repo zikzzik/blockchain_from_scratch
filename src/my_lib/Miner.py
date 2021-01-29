@@ -1,6 +1,7 @@
 from .SocketConnection import SocketConnection
 from .Message import Message
 from .ChannelManager import ChannelManager
+import time
 
 
 class Miner:
@@ -22,27 +23,28 @@ class Miner:
         print("Le serveur écoute à présent sur le port {}".format(self.port), flush=True)
 
         while True:
-            channel = self.socket_connection.accept()
+            channel, (host, port) = self.socket_connection.accept()
+            self.channel_manager.add_server(host, port)
             message = channel.read_message()
-            print(message)
-            self.route_message(message)
+            self.route_message(channel, message)
+
             # channel.send_message(Message("ok"))
 
-    def join_pool(self, destination_dict: dict):
-
-        # channel = SocketConnection(host, port).create_client(host, port)
-        message_in = Message("join_pool", destination_dict=destination_dict)
+    def join_pool(self, destination: dict):
+        message_in = Message("join_pool", destination=destination)
         # channel.send_message(message_in)
-        self.channel_manager.send_message(message_in)
-        # message_out = channel.read_message()
-        # print(f"Reply: pool join ? -> {message_out}")
+        channel = self.channel_manager.send_message(message_in)
+        m = channel.read_message()
+        print(f"Pool join  -> {m}")
 
-    def new_server_accepted(self, message):
-        print(f"New server accepted : {message.source_dict}")
+    def new_server_accepted(self, channel, message):
+        print(f"New server accepted : {message.source}")
+        message = Message("connection_list", content=self.channel_manager.get_connections())
+        self.channel_manager.answer_message(channel, message)
 
-    def route_message(self, message: Message):
+    def route_message(self, channel, message: Message):
         action_dict = {"join_pool": self.new_server_accepted}
-        action_dict[message.m_type](message)
+        action_dict[message.m_type](channel, message)
 
 
 
