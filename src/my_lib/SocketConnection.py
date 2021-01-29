@@ -23,10 +23,13 @@ class SocketConnection:
         client_socket, (host, port) = self.my_socket.accept()
         return Channel(client_socket, host, port)
 
-    def create_client(self, host, port):
+    def create_client(self):
         assert self.my_socket is None, "Socket already used"
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.my_socket.connect((host, port))
+        self.my_socket.connect((self.host, self.port))
         self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return Channel(self.my_socket, host, port)
+        return Channel(self.my_socket, self.host, self.port)
+
+
+    "{(host, port): socket}"
 
