@@ -1,14 +1,18 @@
 from .SocketConnection import SocketConnection
 from .Message import Message
 from .ChannelManager import ChannelManager
+from .Block import Block
+from .Blockchain import Blockchain
 import time
 
 
 class Miner:
 
-    def __init__(self, host="localhost", port=9000, connection_host=None, connection_port=None):
+    def __init__(self, host="localhost", port=9000, connection_host=None, connection_port=None, difficulty=1):
         self.host = host
         self.port = port
+        self.difficulty = difficulty
+        self.blockchain = Blockchain()
 
         self.channel_manager = ChannelManager(host, port)
 
@@ -19,7 +23,7 @@ class Miner:
         self.launch_server()
 
     # async
-    def launch_server(self):
+    async def launch_server(self):
         print("Le serveur écoute à présent sur le port {}".format(self.port), flush=True)
 
         while True:
@@ -47,4 +51,22 @@ class Miner:
         action_dict[message.m_type](channel, message)
 
 
+    def mine_block(self, block: Block, heart_bit_interval=0.1):
+
+        nonce = 0
+        last_heart_bit = time.time()
+        while True:
+            block.set_nonce(nonce)
+
+            if block.is_correct(difficulty=self.difficulty):
+                if self.blockchain.get_idx_last_block() < block.get_index():
+                    self.blockchain.add_block(block)
+                    return None
+                else:
+                    return None
+
+            if last_heart_bit + heart_bit_interval > time.time():
+                if not self.blockchain.get_idx_last_block() < block.get_index():
+                    return None
+            nonce += 1
 
