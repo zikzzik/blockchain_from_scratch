@@ -51,3 +51,6 @@ class Message:
 
     def set_source(self, host: str, port: int):
         self.source: dict = {"host": host, "port": port}
+
+    def get_source(self):
+        return self.source["host"], self.source["port"]

@@ -1,19 +1,20 @@
 from hashlib import sha256
 import time
-from copy import deepcopy
 
 
 class Block:
 
-    def __init__(self, index, previous_hash, size_max, nonce=0, timestamp=None):
+    def __init__(self, index, previous_hash, block_size, nonce=0, timestamp: float = None):
         self.index = index
         self.transaction_list = []
-        self.size_max = size_max
+        self.size_max = block_size
         self.previous_hash = previous_hash
         self.nonce = nonce
         self.timestamp = int(time.time()) if timestamp is None else timestamp
 
-    def add_transaction(self, timestamp, sender, receiver, mount):
+    def add_transaction(self, sender, receiver, mount, timestamp: float = None):
+        timestamp = int(time.time()) if timestamp is None else timestamp
+
         if len(self.transaction_list) < self.size_max:
             self.transaction_list.append((timestamp, sender, receiver, mount))
 
@@ -30,5 +31,10 @@ class Block:
     def get_index(self):
         return self.index
 
-    def copy(self):
-        return deepcopy(self)
+    def copy_for_mining(self):
+        return self
+
+    def get_transaction_list(self):
+        return [{"sender": transaction[1], "receiver": transaction[2], "mount": transaction[3]} for transaction in self.transaction_list]
+
+

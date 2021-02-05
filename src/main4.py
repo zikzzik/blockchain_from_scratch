@@ -29,14 +29,14 @@ if __name__ == "__main__":
     # print(b.__dict__)
 
     m = Miner(host="localhost", port=8000, difficulty=1)
-    m.mine_block(block=b.copy())
+    m.mine_block(block=b.copy_for_mining())
 
     b2 = my_lib.Block(index=2, previous_hash="None", size_max=10, nonce=0, timestamp=None)
     b2.add_transaction(timestamp=time.time(), sender="Moi", receiver="Toi", mount=9)
 
-    m.mine_block(block=b2.copy())
+    m.mine_block(block=b2.copy_for_mining())
 
     time.sleep(10)
-    print(m.blockchain.blockchain)
+    print(m.blockchain.block_list)
     pass
 

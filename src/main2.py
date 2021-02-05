@@ -1,6 +1,8 @@
-from my_lib import Miner
+from my_lib import Miner, Message, ChannelManager
+
 
 if __name__ == "__main__": 
-    Miner(host="localhost", port=8001, connection_host="localhost", connection_port=8000)
 
+    c = ChannelManager("localhost", 9000)
 
+    c.send_message(Message("start_mine", destination={"host": "localhost", "port": 8000}))

@@ -8,7 +8,6 @@ class Channel:
         self.port = port
 
     def send_message(self, message: Message):
-        print("a", message)
         binaries = message.to_binary()
         self.my_socket.send(binaries)
 

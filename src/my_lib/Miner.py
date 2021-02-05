@@ -15,7 +15,9 @@ class Miner:
         self.host = host
         self.port = port
         self.difficulty = difficulty
-        self.blockchain = Blockchain()
+        self.lock = threading.Lock()
+        self.blockchain = Blockchain(self.lock)
+        self.waiting_transaction = set()
 
         self.channel_manager = ChannelManager(host, port)
 
@@ -23,23 +25,20 @@ class Miner:
         if self.is_first is False:
             self.join_pool({"host": connection_host, "port": connection_port})
         self.socket_connection = SocketConnection(self.host, self.port).create_server()
-        # self.launch_server()
-
+        self.launch_server()
 
     def launch_server(self):
         print("Le serveur écoute à présent sur le port {}".format(self.port), flush=True)
 
         while True:
-            channel, (host, port) = self.socket_connection.accept()
-            self.channel_manager.add_server(host, port)
+            channel, _ = self.socket_connection.accept()
             message = channel.read_message()
-            self.route_message(channel, message)
-
-            # channel.send_message(Message("ok"))
+            origin_host, origin_port = message.get_source()
+            self.channel_manager.add_server(origin_host, origin_port)
+            threading.Thread(target=self.route_message, args=(channel, message)).start()
 
     def join_pool(self, destination: dict):
         message_in = Message("join_pool", destination=destination)
-        # channel.send_message(message_in)
         channel = self.channel_manager.send_message(message_in)
         m = channel.read_message()
         print(f"Pool join  -> {m}")
@@ -50,16 +49,14 @@ class Miner:
         self.channel_manager.answer_message(channel, message)
 
     def route_message(self, channel, message: Message):
-        action_dict = {"join_pool": self.new_server_accepted}
+        action_dict = {"join_pool": self.new_server_accepted, "start_mine": self.start_mine}
         action_dict[message.m_type](channel, message)
-
 
     def mine_block(self, block: Block, heart_bit_interval=0.1):
         thread_id_1 = random.randrange(0, 999999)
         thread_id_2 = random.randrange(0, 999999)
         threading.Thread(target=self.mine_block_thread, args=(block, heart_bit_interval, thread_id_1, (0, 2))).start()
         threading.Thread(target=self.mine_block_thread, args=(block, heart_bit_interval, thread_id_2, (1,2))).start()
-
 
     def mine_block_thread(self, block: Block, heart_bit_interval=0.1, thread_id=-1, strat=(0, 1)):
         """
@@ -78,7 +75,6 @@ class Miner:
             if block.is_correct(difficulty=self.difficulty):
                 if self.blockchain.get_idx_last_block() < block.get_index():
                     self.blockchain.add_block(block)
-                    print("succes")
                     return None
                 else:
                     return None
@@ -88,5 +84,28 @@ class Miner:
                     return None
             nonce += strat[1]
 
-            # print(f"id : {thread_id} -> {nonce}")
+    def start_mine(self, channel, message):
+
+        b = Block(index=1, previous_hash="None", block_size=10, nonce=0, timestamp=None)
+
+        b.add_transaction(timestamp=time.time(), sender="Moi", receiver="Toi", mount=5)
+        b.add_transaction(timestamp=time.time(), sender="Moi", receiver="Toi", mount=8)
+        b.add_transaction(timestamp=time.time(), sender="Moi", receiver="Toi", mount=9)
+
+        self.mine_block(b)
+        print(self.blockchain)
+
+
+    def broadcast_blockchain(self):
+        # @todo des que j'update ma blockchain, je broadcast
+        pass
+
+    def broadcast_transaction(self):
+        # @todo si je recois une nouvelle transaction qui n'est pas dans la blockchain et pas dans ma liste: je broadcast
+        pass
+
+    def update_blockchain(self):
+        # @todo  Faire des controlles sur cette blockchain (taille et validité)
+        # si je recois une meilleure blockchain alors j'écrase la mienne
+        pass
 
