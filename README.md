@@ -1,10 +1,10 @@
 # blockchain_from_scratch
 
 # jeudi
-- Créer une classe transaction et ajouter un timestamps
-- Trouver un hash pour le block génésis 0
-- vérifier dans la blockchain si l'envoyeur à les fonds suffisants
-- créer une méthode qui vérifie si une blockchain est juste
+- OK : Créer une classe transaction et ajouter un timestamps
+- OK : créer une méthode qui vérifie si une blockchain est juste
+- OK : vérifier dans la blockchain si l'envoyeur à les fonds suffisants
+- OK : Trouver un hash pour le block génésis 0
 
 # vendredi 
 - quand un miner recoit une transaction :  la transférer aux autres mineurs
@@ -14,7 +14,7 @@
   
 # pendant le week-end / lundi / mardi 
 - implenter les arbres de merkeles
-- coder les wallets
+- coder les wallets + cryptographie : clé publique clé privée
 - byzantin
 
 
