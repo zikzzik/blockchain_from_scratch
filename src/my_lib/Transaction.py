@@ -17,3 +17,8 @@ class Transaction:
                     self.timestamp == other.timestamp)
         return False
 
+    def __hash__(self):
+        return hash(f"{self.sender}_{self.receiver}_{self.mount}_{self.timestamp}")
+
+    def __str__(self):
+        return f"{self.sender} to {self.receiver} : {self.mount}"

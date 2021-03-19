@@ -7,15 +7,16 @@
 - OK : Trouver un hash pour le block génésis 0
 
 # vendredi 
-- quand un miner recoit une transaction :  la transférer aux autres mineurs
-- quand je mets à jour ma blockchain, je la broadcast
-- si je recois une nouvelle blockchain, je la mets à jours si besoin
+- OK : quand un miner recoit une transaction :  la transférer aux autres mineurs
+- a tester : quand je mets à jour ma blockchain, je la broadcast
+- a tester : si je recois une nouvelle blockchain, je la mets à jours si besoin
 -> analyse merkles road map
   
 # pendant le week-end / lundi / mardi 
 - implenter les arbres de merkeles
 - coder les wallets + cryptographie : clé publique clé privée
-- byzantin
+- algo pour gérer les ip/port
 
 
 
+ajouter un identifant mineur + block -> récompense mineur

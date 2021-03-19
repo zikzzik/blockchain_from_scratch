@@ -38,3 +38,6 @@ if __name__ == "__main__":
     print(bc.is_valid_blockchain(3))
 
     print(bc.is_valid_transaction(Transaction("antoine", "zak", 1)))
+    print(bc.is_valid_transaction(Transaction("antoine", "zak", 999999999)))
+    print(bc.is_valid_transaction(Transaction("toto", "zak", 10)))
+

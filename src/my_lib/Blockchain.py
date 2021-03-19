@@ -83,3 +83,10 @@ class Blockchain:
             for sender_transaction in block.get_transaction_list(sender=transaction.sender):
                 sender_sold -= sender_transaction.mount
         return sender_sold > transaction.mount
+
+    def is_transaction_register(self, transaction: Transaction):
+        for block in self.block_list:
+            for register_transaction in block.get_transaction_list():
+                if register_transaction == transaction:
+                    return True
+        return False

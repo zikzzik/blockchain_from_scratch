@@ -12,25 +12,30 @@ class ChannelManager:
 
     def send_message(self, message) -> [Channel, None]:
         message.set_source(self.host, self.port)
-        # ajouter hash, signature...
         message.add_created_at()
 
-        if message.broadcast is False:
-            # envoie unique
+        if message.destination is not None and message.broadcast is False:
+            # simple send
             assert len(message.destination) == 2, "No destination in message"
             channel = SocketConnection(message.destination["host"], message.destination["port"]).create_client()
-            channel.send_message(message)
-
+            if channel is not False:
+                channel.send_message(message)
+            else:
+                print(f"can't send message to {message.destination['host']}:{message.destination['port']}")
             return channel
-            # a décommenter si on garde les sockets o
-        else:
+        elif message.destination is None and message.broadcast is True:
             # broadcast
             for host, port in self.connections:
                 if (host, port) == (self.host, self.port):
                     continue
                 channel = SocketConnection(host, port).create_client()
-                channel.send_message(message)
+                if channel is not False:
+                    channel.send_message(message)
+                else:
+                    print(f"can't send message to {host}:{port}")
             return None
+        else:
+            raise ValueError("Message have broadcast True and destination")
 
     def add_server(self, host, port):
         self.connections.add((host, port))
