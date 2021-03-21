@@ -15,6 +15,7 @@ class Block:
 
     def add_transaction(self, transaction: Transaction):
         assert transaction.timestamp is not None
+        assert len(self.transaction_list) <= self.block_size, "Try to add a transaction in full block"
 
         if len(self.transaction_list) < self.block_size:
             self.transaction_list.append(transaction)
@@ -44,6 +45,9 @@ class Block:
             return [el for el in self.transaction_list if el.sender == sender]
         else:
             return self.transaction_list
+
+    def is_full_transaction(self):
+        return len(self.transaction_list) == self.block_size
 
     def __str__(self):
         return f"hash {self.hash}"

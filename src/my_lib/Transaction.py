@@ -1,5 +1,6 @@
-class Transaction:
 
+
+class Transaction:
     def __init__(self, sender: str, receiver: str, mount: float, timestamp: int = None):
         self.sender = sender
         self.receiver = receiver
@@ -22,3 +23,6 @@ class Transaction:
 
     def __str__(self):
         return f"{self.sender} to {self.receiver} : {self.mount}"
+
+    def is_valid(self):
+        return len(self.sender) > 0 and len(self.receiver) > 0 and self.mount > 0 and self.timestamp > 0

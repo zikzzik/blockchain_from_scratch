@@ -7,3 +7,4 @@ from .Wallet import Wallet
 from .Block import Block
 from .Blockchain import Blockchain
 from .Transaction import Transaction
+from .TransactionRequest import TransactionRequest

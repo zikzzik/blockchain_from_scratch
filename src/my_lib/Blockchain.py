@@ -5,50 +5,45 @@ from datetime import datetime
 
 
 class Blockchain:
-    def __init__(self, lock, block_size=1):
-        self.lock = lock
+    def __init__(self, block_size=3):
         self.block_list = []
         self.block_size = block_size
         self.block_list.append(self.create_genesis_block())
 
-    def add_block(self, block):
-        self.lock.acquire()
+    def add_block(self, block, lock):
+        lock.acquire()
         try:
-            if self.get_idx_last_block() + 1 == block.get_index():
+            if self.get_last_block_idx() + 1 == block.get_index():
                 self.block_list.append(block)
             else:
-                raise ValueError("Can't add a block with index inferior")
+                raise IndexError("Can't add a block with index inferior")
         finally:
-            self.lock.release()
+            lock.release()
 
     def get_block_list(self):
         return self.block_list
 
-    def get_idx_last_block(self):
+    def get_last_block_idx(self):
         if len(self.block_list) == 0:
             return -1
         return self.block_list[-1].get_index()
 
     def __str__(self):
-        res = "Contain blockchain : \n"
+        res = "\nContain blockchain : \n"
         for block in self.block_list:
-            res += f" * block idx : {block.get_index()}\n"
+            res += f" * block idx : {block.get_index()}, (nonce : {block.nonce})\n"
             for transaction in block.get_transaction_list():
-                res += f"  - {transaction.sender} -> {transaction.receiver} : {transaction.mount} tokens\n"
+                res += f"  {transaction}\n"
             res += "\n"
         return res
-
-    def check_valid_operation(self, sender, mount):
-        # @todo vérifie si l'envoyeur à les fonds suffisant
-        pass
 
     def create_genesis_block(self):
         # Set up manually
         ts = int(datetime.timestamp(datetime(1998, 6, 9, 22, 46)))
         genesis_bloc = Block(index=0, previous_hash="Hello world", block_size=self.block_size, timestamp=ts)
-        genesis_bloc.add_transaction(Transaction("admin", "zak", 6000, ts))
-        genesis_bloc.add_transaction(Transaction("admin", "antoine", 5000, ts))
-        genesis_bloc.add_transaction(Transaction("admin", "sylvain", 4000, ts))
+        genesis_bloc.add_transaction(Transaction("SYSTEM", "5MrzFo5omy6wYgi2oMLFZJ5rjfGXSxokhhVeC7kULVRE", 6000, ts))
+        genesis_bloc.add_transaction(Transaction("SYSTEM", "JDLvmPFK7Aai41RxAsciv862AUa9va4ANFFkJ23fXJZg", 5000, ts))
+        genesis_bloc.add_transaction(Transaction("SYSTEM", "HWjHxcSdwBB9thkLCtiVfqiy5iAr25Y2x1bEJXhaCDPKs", 4000, ts))
         genesis_bloc.set_nonce(1)
 
         return genesis_bloc
@@ -90,3 +85,6 @@ class Blockchain:
                 if register_transaction == transaction:
                     return True
         return False
+
+    def get_last_block_hash(self):
+        return self.block_list[-1].hash()

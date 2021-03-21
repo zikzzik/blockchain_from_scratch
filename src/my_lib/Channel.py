@@ -13,5 +13,6 @@ class Channel:
         self.my_socket.send(binaries)
 
     def read_message(self) -> Message:
-        bin_message = self.my_socket.recv(1024)
+        # the best way is to send a first message with the size before
+        bin_message = self.my_socket.recv(1000000000)  # 1Go
         return Message.from_binary(bin_message)

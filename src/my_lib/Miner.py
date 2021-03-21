@@ -6,6 +6,7 @@ from .ChannelManager import ChannelManager
 from .Block import Block
 from .Blockchain import Blockchain
 from .Transaction import Transaction
+from .TransactionRequest import TransactionRequest
 import time
 import threading
 import sys
@@ -19,12 +20,16 @@ class Miner:
         connection_host: str = None,
         connection_port: int = None,
         difficulty: int = 3,
+        block_size: int = 3,
+        thread_miner_number: int = 2,
     ):
         self.host = host
         self.port = port
         self.difficulty = difficulty
+        self.block_size = block_size
         self.lock = threading.Lock()
-        self.blockchain = Blockchain(self.lock)
+        self.thread_miner_number = thread_miner_number
+        self.blockchain = Blockchain(self.block_size)
         self.waiting_transaction = set()
 
         self.channel_manager = ChannelManager(host, port)
@@ -63,11 +68,12 @@ class Miner:
             sys.exit("Can't join pool, connection impossible")
         else:
             m_connection_list = channel.read_message()
-            assert m_connection_list.m_type == "CONNECTION_LIST", "JOIN_POOL response message is not type 'CONNECTION_LIST'"
+            assert (
+                m_connection_list.m_type == "CONNECTION_LIST"
+            ), "JOIN_POOL response message is not type 'CONNECTION_LIST'"
             print(f"Pool join")
             [self.channel_manager.add_server(host, port) for host, port in m_connection_list.content]
             self.broadcast_hi()
-
 
     def new_server_accepted(self, channel, message):
         """Method use when the miner receiver a message 'JOIN_POOL'
@@ -86,15 +92,32 @@ class Miner:
     def route_message(self, channel, message: Message):
         action_dict = {
             "JOIN_POOL": self.new_server_accepted,
-            "TRANSACTION": self.receive_transaction,
+            "REQUEST_TRANSACTION": self.receive_request_transaction,
             "BLOCKCHAIN": self.receive_blockchain,
             "HI": self.receive_hi,
         }
         action_dict[message.m_type](channel, message)
 
-    def mine_block(self, block: Block, heart_bit_interval=0.1):
-        threading.Thread(target=self.mine_block_thread, args=(block, heart_bit_interval, (0, 2))).start()
-        threading.Thread(target=self.mine_block_thread, args=(block, heart_bit_interval, (1, 2))).start()
+    def mine_block_and_get_nonce(self, block: Block, heart_bit_interval=0.1):
+
+        self.nonce_list = []
+        for i in range(self.thread_miner_number):
+            t = threading.Thread(
+                target=self.mine_block_thread, args=(block, heart_bit_interval, (i, self.thread_miner_number))
+            )
+            t.start()
+
+        while True:
+            try:
+                return [el for el in self.nonce_list if el is not None][0]
+            except IndexError:
+                pass
+
+            none_count = len([el for el in self.nonce_list if el is None])
+            if none_count == self.thread_miner_number:
+                return None
+
+            time.sleep(1)
 
     def mine_block_thread(self, block: Block, heart_bit_interval=0.1, strat=(0, 1)):
         """
@@ -113,39 +136,58 @@ class Miner:
             block.set_nonce(nonce)
 
             if block.is_correct(difficulty=self.difficulty):
-                print(block.nonce)
-                if self.blockchain.get_idx_last_block() < block.get_index():
-                    self.blockchain.add_block(block)
-                    return None
-                else:
-                    return None
-            # @ todo tmp comment for hash calcul
+                self.lock.acquire()
+                self.nonce_list.append(block.nonce)
+                self.lock.release()
+                return
+
             if last_heart_bit + heart_bit_interval > time.time():
-                if self.blockchain.get_idx_last_block() >= block.get_index():
-                    return None
+                if self.blockchain.get_last_block_idx() >= block.get_index():
+                    self.lock.acquire()
+                    self.nonce_list.append(None)
+                    self.lock.release()
+                    return
             nonce += strat[1]
 
     def start_mine(self):
-        # TODO Code pas beau / devra être lancé dans un thread
-        # b = Block(index=1, previous_hash="None", block_size=10, nonce=0, timestamp=None)
+        while True:
+            next_block = Block(
+                index=self.blockchain.get_last_block_idx() + 1,
+                previous_hash=self.blockchain.get_last_block_hash(),
+                block_size=self.block_size,
+                timestamp=int(time.time()),
+            )
 
-        # ts = int(datetime.timestamp(datetime(2000, 6, 1, 12, 12)))
-        # b = Block(
-        #     index=2,
-        #     previous_hash="000a18ee3d4a4229016502b4bb6702b3147095000cd2595f980458cd0bae76fd",
-        #     block_size=3,
-        #     timestamp=ts,
-        # )
-        # b.add_transaction(Transaction("zak", "sylvain", 10000, ts))
-        # b.add_transaction(Transaction("antoine", "zak", 5000, ts))
-        # b.add_transaction(Transaction("zak", "antoine", 30, ts))
-        #
-        # self.mine_block(b)
-        # print(self.blockchain)
-        pass
+            while next_block.is_full_transaction() is False:
+                if len(self.waiting_transaction) > 0:
+                    transaction = self.pop_transaction_in_queue()
+                    if not self.blockchain.is_transaction_register(
+                        transaction
+                    ) and self.blockchain.is_valid_transaction(transaction):
+                        next_block.add_transaction(transaction)
+                else:
+                    print("Wait...")
+                    time.sleep(5)
 
-    def receive_transaction(self, channel, message):
-        """Method use when the miner receiver a message 'TRANSACTION'
+            # block ready
+            nonce = self.mine_block_and_get_nonce(next_block)
+            if nonce is not None:
+                next_block.set_nonce(nonce)
+                try:
+                    self.blockchain.add_block(next_block, self.lock)
+                    print("add_new_block, size :", self.blockchain)
+                except IndexError:
+                    nonce = None
+
+            if nonce is None:
+                for transaction in next_block.transaction_list:
+                    self.add_transaction_in_queue(transaction)
+                print("reset block")
+            else:
+                self.broadcast_blockchain()
+
+    def receive_request_transaction(self, channel, message):
+        """Method use when the miner receiver a message 'REQUEST_TRANSACTION'
 
         Args:
             channel:
@@ -154,28 +196,41 @@ class Miner:
         Returns:
 
         """
-        print("receive transaction")
-        transaction = message.content
-        if transaction in self.waiting_transaction or self.blockchain.is_transaction_register(transaction):
+        request_transaction = message.content
+        print("receive request transaction :")
+        if request_transaction.is_valid_signature:
+            transaction = request_transaction.get_transaction()
+        else:
+            print("Bad request transaction")
+            return
+
+        if (
+            transaction.is_valid() is False
+            or transaction in self.waiting_transaction
+            or self.blockchain.is_transaction_register(transaction)
+        ):
             return
         else:
             self.add_transaction_in_queue(transaction)
-            self.broadcast_transaction(transaction)
+            self.broadcast_request_transaction(request_transaction)
             return
 
     def receive_blockchain(self, channel, message):
         external_blockchain: Blockchain = message.content
-        if self.blockchain.get_idx_last_block() >= external_blockchain.get_idx_last_block:
+        if self.blockchain.get_last_block_idx() >= external_blockchain.get_last_block_idx():
+            print("received blockchain but not updated")
             return
         if external_blockchain.is_valid_blockchain(self.difficulty):
             self.lock.acquire()
             self.blockchain = external_blockchain
             self.lock.release()
+            print("receive blockchain and keep it")
+            print(self.blockchain)
 
     def receive_hi(self, channel, message: Message):
         print(f"A new server join pool : {message.source['host']}:{message.source['port']}")
 
-    def broadcast_transaction(self, transaction: Transaction):
+    def broadcast_request_transaction(self, request_transaction: TransactionRequest):
         """Send a message contain a transaction in broadcast
 
         Args:
@@ -184,9 +239,9 @@ class Miner:
         Returns:
 
         """
-        message_in = Message("TRANSACTION", transaction, broadcast=True)
+        message_in = Message("REQUEST_TRANSACTION", request_transaction, broadcast=True)
         self.channel_manager.send_message(message_in)
-        print(f"Transaction broadcast -> {transaction}")
+        print(f"Request transaction broadcast -> {request_transaction}")
 
     def broadcast_blockchain(self):
         """Send a message contain a blockchain in broadcast
@@ -214,8 +269,8 @@ class Miner:
         self.lock.release()
         return
 
-    def delete_transaction_in_queue(self, transaction: Transaction):
+    def pop_transaction_in_queue(self):
         self.lock.acquire()
-        self.waiting_transaction.remove(transaction)
+        transaction = self.waiting_transaction.pop()
         self.lock.release()
-        return
+        return transaction

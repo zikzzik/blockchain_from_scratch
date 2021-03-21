@@ -8,15 +8,25 @@
 
 # vendredi 
 - OK : quand un miner recoit une transaction :  la transférer aux autres mineurs
-- a tester : quand je mets à jour ma blockchain, je la broadcast
-- a tester : si je recois une nouvelle blockchain, je la mets à jours si besoin
--> analyse merkles road map
+- OK : quand je mets à jour ma blockchain, je la broadcast
+- OK : si je recois une nouvelle blockchain, je la mets à jours si besoin
   
+# samedi 
+- OK : coder main miner
+- OK : number thread dynamique
+
 # pendant le week-end / lundi / mardi 
-- implenter les arbres de merkeles
-- coder les wallets + cryptographie : clé publique clé privée
-- algo pour gérer les ip/port
+- Ok : Implementer le système de clé
+- OK : Coder les wallets
+- Implenter les arbres de merkeles
+  
 
 
+[comment]: <> (- algo pour gérer les ip/port)
+- ajouter un identifant mineur + block -> récompense mineur
+- trié transaction par prix / frais
 
-ajouter un identifant mineur + block -> récompense mineur
+
+- A envoie Transaction / Clé public
+- Miner vérifie authenticité de la demande
+- Ajoute dans la blockchain
