@@ -2,6 +2,7 @@ from hashlib import sha256
 import time
 from .Transaction import Transaction
 from copy import deepcopy
+from merkletools import MerkleTools
 
 
 class Block:
@@ -49,5 +50,20 @@ class Block:
     def is_full_transaction(self):
         return len(self.transaction_list) == self.block_size
 
+    def get_merkle_root(self):
+        tree = MerkleTools(hash_type="SHA256")
+        tree.add_leaf([str(el) for el in self.transaction_list], True)
+        tree.make_tree()
+        return tree
+
+    def merkle_root_calculation(self):
+        self.merkle_root = self.get_merkle_root().get_merkle_root()
+
     def __str__(self):
         return f"hash {self.hash}"
+
+    def get_transaction_position(self, transaction: Transaction):
+        for pos, registred_transaction in enumerate(self.transaction_list):
+            if transaction == registred_transaction:
+                return pos
+        assert False, "ERROR Transaction not found in block"

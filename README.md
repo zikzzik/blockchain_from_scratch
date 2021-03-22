@@ -20,9 +20,10 @@
 - OK : Coder les wallets
 - Implenter les arbres de merkeles
   
+# Merkle 
+- Demander la liste des empreintes
+- re-calculer l’empreinte numérique
 
-
-[comment]: <> (- algo pour gérer les ip/port)
 - ajouter un identifant mineur + block -> récompense mineur
 - trié transaction par prix / frais
 
@@ -30,3 +31,8 @@
 - A envoie Transaction / Clé public
 - Miner vérifie authenticité de la demande
 - Ajoute dans la blockchain
+
+input -> transaction
+output -> merkle root, list hash temporaire
+
+recalcule des hash

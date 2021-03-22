@@ -7,6 +7,7 @@ from .Block import Block
 from .Blockchain import Blockchain
 from .Transaction import Transaction
 from .TransactionRequest import TransactionRequest
+from .MerkleProof import MerkleProof
 import time
 import threading
 import sys
@@ -95,6 +96,7 @@ class Miner:
             "REQUEST_TRANSACTION": self.receive_request_transaction,
             "BLOCKCHAIN": self.receive_blockchain,
             "HI": self.receive_hi,
+            "CHECK_TRANSACTION": self.receive_check_transaction
         }
         action_dict[message.m_type](channel, message)
 
@@ -170,6 +172,7 @@ class Miner:
                     time.sleep(5)
 
             # block ready
+            next_block.merkle_root_calculation()
             nonce = self.mine_block_and_get_nonce(next_block)
             if nonce is not None:
                 next_block.set_nonce(nonce)
@@ -229,6 +232,18 @@ class Miner:
 
     def receive_hi(self, channel, message: Message):
         print(f"A new server join pool : {message.source['host']}:{message.source['port']}")
+        
+    def receive_check_transaction(self, channel, message):
+        transaction = message.content
+        block = self.blockchain.get_block(transaction)
+        if block is None:
+            proof = MerkleProof(not_found=True)
+        else:
+            transaction_position = block.get_transaction_position(transaction)
+            proof = MerkleProof(root=block.merkle_root, hash_list=block.get_merkle_root().get_proof(transaction_position))
+        response_message = Message("PROOF_TRANSACTION", proof)
+        self.channel_manager.answer_message(channel, response_message)
+
 
     def broadcast_request_transaction(self, request_transaction: TransactionRequest):
         """Send a message contain a transaction in broadcast

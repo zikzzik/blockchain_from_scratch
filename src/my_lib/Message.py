@@ -20,7 +20,8 @@ class Message:
         test -> use only in development
     """
 
-    allow_type_set: set = {"JOIN_POOL", "REQUEST_TRANSACTION", "BLOCKCHAIN", "OK", "CONNECTION_LIST", "HI"}
+    allow_type_set: set = {"JOIN_POOL", "REQUEST_TRANSACTION", "BLOCKCHAIN", "OK", "CONNECTION_LIST", "HI",
+                           "CHECK_TRANSACTION", "TRANSACTION", "PROOF_TRANSACTION"}
 
     def __init__(self, m_type: str, content: bin = None, destination: dict = None, broadcast=False):
         """

@@ -5,7 +5,7 @@ from .Message import Message
 from .ChannelManager import ChannelManager
 from .key_utils import *
 import time
-
+import hashlib
 
 class Wallet:
     def __init__(
@@ -59,3 +59,17 @@ class Wallet:
         with open(public_key_path, "w") as pf:
             pf.write(p.decode())
             pf.close()
+
+
+    def check_transaction(self, transaction: Transaction):
+        message = Message("CHECK_TRANSACTION", transaction,
+                          destination={"host": self.connection_host, "port": self.connection_port})
+
+        channel_manager = ChannelManager(self.host, self.port)
+        channel = channel_manager.send_message(message)
+        if channel is None:
+            print("can't send miner")
+            return
+        response_message = channel.read_message()
+        proof = response_message.content
+        return proof.is_in_merkle_root(transaction)

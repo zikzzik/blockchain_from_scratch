@@ -7,3 +7,4 @@ ecdsa==0.16.1
 pycoin==0.90.20201031
 bitcoinaddress==0.1.5
 crypto==1.4.1
+merkletools==1.0.3

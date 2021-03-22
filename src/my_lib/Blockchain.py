@@ -88,3 +88,10 @@ class Blockchain:
 
     def get_last_block_hash(self):
         return self.block_list[-1].hash()
+
+    def get_block(self, transaction: Transaction):
+        for block in self.block_list:
+            for register_transaction in block.get_transaction_list():
+                if register_transaction == transaction:
+                    return block
+        return None
