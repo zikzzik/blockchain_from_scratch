@@ -4,7 +4,7 @@ from time import time
 
 
 address_list = {
-    "antoine": "JDLvmPFK7Aai41RxAsciv862AUa9va4ANFFkJ23fXJZg",      # 1
+    "antoine": "FiLz2wYz1kXuisZg1koWDhZhrekhD7GSgNLRevXH5b5U",      # 1
     "zak": "5MrzFo5omy6wYgi2oMLFZJ5rjfGXSxokhhVeC7kULVRE",          # 2
     "sylvain": "HWjHxcSdwBB9thkLCtiVfqiy5iAr25Y2x1bEJXhaCDPKs"      # 3
 }
