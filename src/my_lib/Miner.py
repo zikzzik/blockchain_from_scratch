@@ -52,12 +52,12 @@ class Miner:
         self.launch_server()
 
     def launch_server(self):
-        """
+        """ Method use to start listening message on  on port
 
         Returns:
 
         """
-        print("Le serveur écoute à présent sur le port {}".format(self.port), flush=True)
+        print("The server is listening on port {}".format(self.port), flush=True)
 
         while True:
             channel, _ = self.socket_connection.accept()
@@ -103,6 +103,15 @@ class Miner:
         self.channel_manager.answer_message(channel, message)
 
     def route_message(self, channel, message: Message):
+        """Method use to route message on good methode
+
+        Args:
+            channel:
+            message:
+
+        Returns:
+
+        """
         action_dict = {
             "JOIN_POOL": self.new_server_accepted,
             "REQUEST_TRANSACTION": self.receive_request_transaction,
@@ -114,7 +123,7 @@ class Miner:
         action_dict[message.m_type](channel, message)
 
     def mine_block_and_get_nonce(self, block: Block, heart_bit_interval=0.1):
-        """
+        """ Method use to mine block and return nonce
 
         Args:
             block:
@@ -144,8 +153,8 @@ class Miner:
             time.sleep(1)
 
     def mine_block_thread(self, block: Block, heart_bit_interval=0.1, strat=(0, 1)):
-        """
-            CARE DELETE THREAD ID
+        """ Method use to mine block, its always launch in thread
+
         Args:
             block:
             heart_bit_interval:
@@ -174,7 +183,7 @@ class Miner:
             nonce += strat[1]
 
     def start_mine(self):
-        """
+        """ Method use to start mine
 
         Returns:
 
@@ -248,7 +257,7 @@ class Miner:
             return
 
     def receive_blockchain(self, channel, message):
-        """
+        """Method use when the miner receiver a message 'BLOCKCHAIN'
 
         Args:
             channel:
@@ -269,7 +278,7 @@ class Miner:
             print(self.blockchain)
 
     def receive_hi(self, channel, message: Message):
-        """
+        """Method use when the miner receiver a message 'Hi'
 
         Args:
             channel:
@@ -281,7 +290,7 @@ class Miner:
         print(f"A new server join pool : {message.source['host']}:{message.source['port']}")
         
     def receive_check_transaction(self, channel, message):
-        """
+        """Method use when the miner receiver a message 'TRANSACTION'
 
         Args:
             channel:
@@ -301,7 +310,7 @@ class Miner:
         self.channel_manager.answer_message(channel, response_message)
 
     def receive_request_sold(self, channel, message):
-        """
+        """Method use when the miner receiver a message 'REQUEST_SOLD'
 
         Args:
             channel:
@@ -340,7 +349,7 @@ class Miner:
         print(f"Blockchain broadcast")
 
     def broadcast_hi(self):
-        """Send a message contain a blockchain in broadcast
+        """Send a message contain a Hi in broadcast
 
         Returns:
 
@@ -350,7 +359,7 @@ class Miner:
         print(f"Hi broadcast")
 
     def add_transaction_in_queue(self, transaction: Transaction):
-        """
+        """ Secure thread to add transaction queue
 
         Args:
             transaction:
@@ -360,11 +369,12 @@ class Miner:
         """
         self.lock.acquire()
         self.waiting_transaction.add(transaction)
+        print("DEBUG add transaction in set", len(self.waiting_transaction))
         self.lock.release()
         return
 
     def pop_transaction_in_queue(self):
-        """
+        """ Secure thread to pop transaction queue
 
         Returns:
 
@@ -375,7 +385,7 @@ class Miner:
         return transaction
 
     def address_calculation(self):
-        """
+        """Method use to calcul the address from public key
 
         Returns:
 
