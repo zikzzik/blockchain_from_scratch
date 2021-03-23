@@ -47,7 +47,7 @@ class Application:
 5. generate new keys 
 6. set connection minor
 Choice :
-                """
+"""
             ))
             if cmd in command_dict:
                 command_dict[cmd]()

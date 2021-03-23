@@ -216,7 +216,7 @@ class Miner:
                 next_block.set_nonce(nonce)
                 try:
                     self.blockchain.add_block(next_block, self.lock)
-                    print("add_new_block, size :", self.blockchain)
+                    print("add_new_block", self.blockchain)
                 except IndexError:
                     nonce = None
 
@@ -369,7 +369,6 @@ class Miner:
         """
         self.lock.acquire()
         self.waiting_transaction.add(transaction)
-        print("DEBUG add transaction in set", len(self.waiting_transaction))
         self.lock.release()
         return
 
