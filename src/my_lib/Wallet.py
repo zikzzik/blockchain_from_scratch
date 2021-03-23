@@ -7,6 +7,7 @@ from .key_utils import *
 import time
 import hashlib
 
+
 class Wallet:
     def __init__(
         self,
@@ -29,16 +30,30 @@ class Wallet:
 
         self.address_calculation()
 
-    def send_token(self, receiver: str, mount: float):
-        transaction = Transaction(self.address, receiver, mount, int(time.time()))
+    def send_token(self, receiver: str, mount: float, ts: int = None):
+        if ts is None:
+            ts = time.time()
+        transaction = Transaction(self.address, receiver, mount, ts)
         request_transaction = TransactionRequest(transaction, self.public_key).sign_transaction(self.private_key)
 
         # send transaction to miner
         message = Message("REQUEST_TRANSACTION", request_transaction,
-                          destination={"host": self.connection_host, "port": self.connection_port})
+                          destination={"host": self.connection_host, "port": self.connection_port}, is_wallet=True)
         channel_manager = ChannelManager(self.host, self.port)
         channel_manager.send_message(message)
         return request_transaction
+
+    def get_sold(self):
+        message = Message("REQUEST_SOLD", self.address,
+                          destination={"host": self.connection_host, "port": self.connection_port}, is_wallet=True)
+        channel_manager = ChannelManager(self.host, self.port)
+        channel = channel_manager.send_message(message)
+        if channel is None:
+            print("can't send miner")
+            return
+        response_message = channel.read_message()
+        sold = response_message.content
+        return sold
     
     def address_calculation(self):
         # Inspire from bitcoin addresses creation -> https://blog.lelonek.me/how-to-calculate-bitcoin-address-in-elixir-68939af4f0e9
@@ -46,7 +61,22 @@ class Wallet:
         public_key_hash = sha256(sha256(str_key))
         self.address = b58encode(public_key_hash)
 
-    def create_key(self, public_key_path="/app/keys/1_public.pem", private_key_path="/app/keys/1_private.pem"):
+    def check_transaction(self, receiver: str, mount: float, ts: int):
+        transaction = Transaction(self.address, receiver, mount, ts)
+        message = Message("CHECK_TRANSACTION", transaction,
+                          destination={"host": self.connection_host, "port": self.connection_port}, is_wallet=True)
+
+        channel_manager = ChannelManager(self.host, self.port)
+        channel = channel_manager.send_message(message)
+        if channel is None:
+            print("can't send miner")
+            return
+        response_message = channel.read_message()
+        proof = response_message.content
+        return proof.is_in_merkle_root(transaction)
+
+    @staticmethod
+    def create_key(public_key_path="/app/keys/1_public.pem", private_key_path="/app/keys/1_private.pem"):
         key = RSA.generate(1024)
 
         k = key.exportKey("PEM")
@@ -60,16 +90,3 @@ class Wallet:
             pf.write(p.decode())
             pf.close()
 
-
-    def check_transaction(self, transaction: Transaction):
-        message = Message("CHECK_TRANSACTION", transaction,
-                          destination={"host": self.connection_host, "port": self.connection_port})
-
-        channel_manager = ChannelManager(self.host, self.port)
-        channel = channel_manager.send_message(message)
-        if channel is None:
-            print("can't send miner")
-            return
-        response_message = channel.read_message()
-        proof = response_message.content
-        return proof.is_in_merkle_root(transaction)

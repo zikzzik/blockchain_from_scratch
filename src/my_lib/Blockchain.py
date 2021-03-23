@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class Blockchain:
-    def __init__(self, block_size=3):
+    def __init__(self, block_size=4):
         self.block_list = []
         self.block_size = block_size
         self.block_list.append(self.create_genesis_block())
@@ -71,13 +71,13 @@ class Blockchain:
         if transaction.mount <= 0:
             return False
 
-        sender_sold = 0
-        for block in self.block_list:
-            for receive_transaction in block.get_transaction_list(receiver=transaction.sender):
-                sender_sold += receive_transaction.mount
-            for sender_transaction in block.get_transaction_list(sender=transaction.sender):
-                sender_sold -= sender_transaction.mount
-        return sender_sold > transaction.mount
+        # sender_sold = 0
+        # for block in self.block_list:
+        #     for receive_transaction in block.get_transaction_list(receiver=transaction.sender):
+        #         sender_sold += receive_transaction.mount
+        #     for sender_transaction in block.get_transaction_list(sender=transaction.sender):
+        #         sender_sold -= sender_transaction.mount
+        return self.sold_calculation(transaction.sender) > transaction.mount
 
     def is_transaction_register(self, transaction: Transaction):
         for block in self.block_list:
@@ -95,3 +95,12 @@ class Blockchain:
                 if register_transaction == transaction:
                     return block
         return None
+
+    def sold_calculation(self, address: str):
+        sender_sold = 0
+        for block in self.block_list:
+            for receive_transaction in block.get_transaction_list(receiver=address):
+                sender_sold += receive_transaction.mount
+            for sender_transaction in block.get_transaction_list(sender=address):
+                sender_sold -= sender_transaction.mount
+        return sender_sold

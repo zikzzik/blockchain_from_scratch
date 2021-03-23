@@ -14,9 +14,12 @@ w = Wallet(public_key_path="/app/keys/1_public.pem",
 request_transaction = w.send_token(adress_list["zak"], 12)
 w.send_token(adress_list["zak"], 11)
 w.send_token(adress_list["zak"], 10)
+#
+# print("res", w.check_transaction(request_transaction.transaction))
 
-print("res", w.check_transaction(request_transaction.transaction))
 
+
+# print(w.get_sold())
 
 if __name__ == "__main__":
     pass

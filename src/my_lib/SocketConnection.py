@@ -38,6 +38,6 @@ class SocketConnection:
         except ConnectionRefusedError:
             return False
 
-
-    "{(host, port): socket}"
-
+    def close_socket(self):
+        if self.my_socket is not None:
+            self.my_socket.close()

@@ -21,9 +21,9 @@ class Message:
     """
 
     allow_type_set: set = {"JOIN_POOL", "REQUEST_TRANSACTION", "BLOCKCHAIN", "OK", "CONNECTION_LIST", "HI",
-                           "CHECK_TRANSACTION", "TRANSACTION", "PROOF_TRANSACTION"}
+                           "CHECK_TRANSACTION", "TRANSACTION", "PROOF_TRANSACTION", "REQUEST_SOLD", "SOLD"}
 
-    def __init__(self, m_type: str, content: bin = None, destination: dict = None, broadcast=False):
+    def __init__(self, m_type: str, content: any = None, destination: dict = None, broadcast=False, is_wallet=False):
         """
 
         Args:
@@ -36,9 +36,10 @@ class Message:
 
         self.destination: dict = destination
 
-        self.content: str = content
+        self.content: any = content
         self.m_type: str = m_type
         self.broadcast: bool = broadcast
+        self.is_wallet = is_wallet
 
     def to_binary(self):
         return pickle.dumps(self)

@@ -1,3 +1,4 @@
+from .Application import Application
 from .Channel import Channel
 from .ChannelManager import ChannelManager
 from .Message import Message

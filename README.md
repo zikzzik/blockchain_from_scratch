@@ -20,19 +20,24 @@
 - OK : Coder les wallets
 - Implenter les arbres de merkeles
   
-# Merkle 
-- Demander la liste des empreintes
-- re-calculer l’empreinte numérique
+## Merkle 
+- OK : Demander la liste des empreintes
+- OK : re-calculer l’empreinte numérique
 
-- ajouter un identifant mineur + block -> récompense mineur
-- trié transaction par prix / frais
+- OK : envoie Transaction / Clé public
+- OK : Miner vérifie authenticité de la demande
+- Ok : Ajoute dans la blockchain
 
-
-- A envoie Transaction / Clé public
-- Miner vérifie authenticité de la demande
-- Ajoute dans la blockchain
-
-input -> transaction
-output -> merkle root, list hash temporaire
-
-recalcule des hash
+- OK : ajouter une adresse au mineur
+- OK : récompense mineur
+- OK : fonction qui calcule le solde
+- soft client
+  -> charger une clé public / privé
+  -> envoyer une transaction
+  -> verifier une transaction
+  -> Demander le solde
+  -> Générer une clé
+  
+- doc
+- revoir les prints
+update README
