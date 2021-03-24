@@ -1,43 +1,53 @@
 # blockchain_from_scratch
 
-# jeudi
-- OK : Créer une classe transaction et ajouter un timestamps
-- OK : créer une méthode qui vérifie si une blockchain est juste
-- OK : vérifier dans la blockchain si l'envoyeur à les fonds suffisants
-- OK : Trouver un hash pour le block génésis 0
+## Installation
 
-# vendredi 
-- OK : quand un miner recoit une transaction :  la transférer aux autres mineurs
-- OK : quand je mets à jour ma blockchain, je la broadcast
-- OK : si je recois une nouvelle blockchain, je la mets à jours si besoin
-  
-# samedi 
-- OK : coder main miner
-- OK : number thread dynamique
+Installer docker et docker-compose (Linux, Windows, Mac)
 
-# pendant le week-end / lundi / mardi 
-- Ok : Implementer le système de clé
-- OK : Coder les wallets
-- Implenter les arbres de merkeles
-  
-## Merkle 
-- OK : Demander la liste des empreintes
-- OK : re-calculer l’empreinte numérique
 
-- OK : envoie Transaction / Clé public
-- OK : Miner vérifie authenticité de la demande
-- Ok : Ajoute dans la blockchain
+## Get starting
 
-- OK : ajouter une adresse au mineur
-- OK : récompense mineur
-- OK : fonction qui calcule le solde
-- soft client
-  -> charger une clé public / privé
-  -> envoyer une transaction
-  -> verifier une transaction
-  -> Demander le solde
-  -> Générer une clé
-  
-- doc
-- revoir les prints
-update README
+``` bash
+    cd docker
+    cp .env.dist .env
+```
+
+Don't modify the .env
+Paste the keys send by mail /keys/
+
+``` bash
+   docker-compose build
+   docker-compose up -d
+```
+
+## Start mining
+
+Enter the container :
+```bash
+  docker exec -it blockchain bash
+```
+Launch the first miner :  
+```bash
+    python3 /app/src/main_wallet.py
+```
+Launch the second miner :  
+```bash
+    python3 /app/src/second_miner.py
+```
+Launch the third miner :  
+```bash
+    python3 /app/src/third_miner.py
+```
+
+## Software wallet
+Use the wallet:  
+``` bash
+    python3 /app/src/wallet_application.py
+```
+
+Basic arg:
+  - load key : 2 
+  - private key : /app/keys/1_private.pem
+  - public key path : /app/keys/1_public.pem
+  - minor host : localhost
+  - minor port : 8000

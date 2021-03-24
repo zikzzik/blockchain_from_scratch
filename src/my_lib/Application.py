@@ -102,5 +102,3 @@ Choice :
         print("address :", self.wallet.address)
 
 
-# /app/keys/1_private.pem
-# /app/keys/1_public.pem
