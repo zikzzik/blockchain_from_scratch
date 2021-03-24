@@ -13,7 +13,6 @@ Installer docker et docker-compose (Linux, Windows, Mac)
 ```
 
 Don't modify the .env
-Paste the keys send by mail /keys/
 
 ``` bash
    docker-compose build
