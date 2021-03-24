@@ -28,7 +28,7 @@ Enter the container :
 ```
 Launch the first miner :  
 ```bash
-    python3 /app/src/main_wallet.py
+    python3 /app/src/main_miner.py
 ```
 Launch the second miner :  
 ```bash
